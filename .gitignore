@@ -1,0 +1,22 @@
+# Data and model files are never committed (course rule)
+data/raw/
+*.csv
+!results/*.csv
+*.zip
+checkpoints/
+*.pkl
+*.joblib
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
