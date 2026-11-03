@@ -78,7 +78,9 @@ def plot_duration_gap(path, name="F2b_duration_gap.png", split="validation"):
     df = pd.read_csv(path)
     df = df[df["metric"] == "pr_auc"]
     g = df.groupby(["model", "feature_set"])["value"].agg(["mean", "std"])
-    names = [m for m in MODEL_ORDER if m in g.index.get_level_values("model")]
+    # The class-weight ablation is about weighting, not the leak, so it is left out here.
+    names = [m for m in MODEL_ORDER
+             if m != "hgb_unweighted" and m in g.index.get_level_values("model")]
     prevalence = g.loc[("dummy", "DEPLOYABLE"), "mean"] if "dummy" in names else None
 
     fig, ax = plt.subplots(figsize=(7, 3.8))
@@ -98,7 +100,7 @@ def plot_duration_gap(path, name="F2b_duration_gap.png", split="validation"):
         ax.annotate(f"no skill = positive rate ({prevalence:.3f})", (len(names) - 0.5, prevalence),
                     textcoords="offset points", xytext=(0, 4), ha="right", fontsize=8, color=ps.INK_2)
     ax.set_xticks(range(len(names)))
-    ax.set_xticklabels([LABELS[m] for m in names], fontsize=9)
+    ax.set_xticklabels([LABELS[m].replace(" (", "\n(").replace(", ", ",\n") for m in names], fontsize=9)
     ax.set_ylabel(f"{split} PR-AUC (mean ± std, 3 seeds)")
     ax.set_ylim(0, 1)
     ax.grid(axis="x", visible=False)
@@ -119,6 +121,12 @@ def main():
     print(duration_gap(RESULTS / "val_metrics.csv").to_string())
     plot_duration_gap(RESULTS / "val_metrics.csv")
     print("\nsaved results/figures/F2b_duration_gap.png")
+    abl = summary(RESULTS / "val_metrics.csv",
+                  metrics=("pr_auc", "roc_auc", "brier", "threshold", "precision", "recall", "n_iter"))
+    abl = abl[abl.index.get_level_values("model").isin(["hgb", "hgb_unweighted"])]
+    if len(abl):
+        print("\nCLASS-WEIGHT ABLATION (same configuration, only class_weight differs)\n")
+        print(abl.to_string())
     if (RESULTS / "dt_cv.csv").exists():
         plot_tree_cv()
         print("saved results/figures/DT_cv_depth_curve.png")

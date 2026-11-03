@@ -96,10 +96,53 @@ def fit_forest(X_tr, y_tr, X_val, y_val, seed, fs):
     return model, fit_time, info
 
 
+def fit_hgb(X_tr, y_tr, X_val, y_val, seed, fs):
+    """Improvement: gradient boosting with class_weight="balanced".
+
+    The 24 configurations in HGB_GRID are compared on validation; inside each fit,
+    early stopping (on 10% of the training rows) picks the number of trees.
+    """
+    t = time.perf_counter()
+    model, fit_time, p, table = tune_on_validation(
+        lambda **kw: models.hgb(seed, weighted=True, **kw), models.HGB_GRID, X_tr, y_tr, X_val, y_val)
+    tune_time = time.perf_counter() - t
+    table.insert(0, "seed", seed)
+    table.insert(0, "feature_set", fs)
+
+    info = {"best_" + k: v for k, v in p.items()} | {
+        "n_iter": model.n_iter_, "tune_time_s": tune_time, "_search_table": table,
+        "_desc": (f"lr={p['learning_rate']} leaves={p['max_leaf_nodes']} leaf={p['min_samples_leaf']} "
+                  f"l2={p['l2_regularization']} trees={model.n_iter_}")}
+    return model, fit_time, info
+
+
+def fit_hgb_unweighted(X_tr, y_tr, X_val, y_val, seed, fs):
+    """Ablation: the configuration chosen for the weighted model, with class_weight=None.
+
+    Only the class weighting changes, so any difference comes from it.
+    """
+    path = RESULTS / "hgb_val_search.csv"
+    if not path.exists():
+        raise SystemExit("run `python -m src.train --models hgb` before the ablation")
+    s = pd.read_csv(path)
+    row = s[(s["feature_set"] == fs) & (s["seed"] == seed) & s["chosen"]].iloc[0]
+    p = {"learning_rate": float(row["learning_rate"]), "max_leaf_nodes": int(row["max_leaf_nodes"]),
+         "min_samples_leaf": int(row["min_samples_leaf"]), "l2_regularization": float(row["l2_regularization"])}
+
+    model = models.hgb(seed, weighted=False, **p)
+    t = time.perf_counter()
+    model.fit(X_tr, y_tr)
+    fit_time = time.perf_counter() - t
+    return model, fit_time, {"n_iter": model.n_iter_,
+                             "_desc": f"same config as hgb, unweighted, trees={model.n_iter_}"}
+
+
 MODELS = {
     "dummy": fit_dummy,
     "tree": fit_tree,
     "forest": fit_forest,
+    "hgb": fit_hgb,
+    "hgb_unweighted": fit_hgb_unweighted,   # must run after "hgb" (reads its chosen configs)
 }
 
 
@@ -154,11 +197,13 @@ def main(model_names, final):
                 print(f"{name:6s} {fs:10s} seed={seed}  val PR-AUC={val_scores['pr_auc']:.4f}  "
                       f"ROC-AUC={val_scores['roc_auc']:.4f}  fit={train_time:.2f}s  {desc}", flush=True)
 
+        # Written per model, so a later model in the same run (the ablation) can read it.
+        if name in search_tables:
+            pd.concat(search_tables[name]).to_csv(RESULTS / f"{name}_val_search.csv", index=False)
+
     merge_into(RESULTS / "val_metrics.csv", val_rows, model_names)
     if cv_tables:
         pd.concat(cv_tables).to_csv(RESULTS / "dt_cv.csv", index=False)
-    for name, tables in search_tables.items():
-        pd.concat(tables).to_csv(RESULTS / f"{name}_val_search.csv", index=False)
     if final:
         merge_into(RESULTS / "metrics.csv", test_rows, model_names)
         print("test-set metrics written to results/metrics.csv")
