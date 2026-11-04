@@ -1,0 +1,5 @@
+outcome,n,mean_score,age_mean,balance_median,campaign_mean,pct_previously_contacted,pct_poutcome_success,pct_contact_unknown,pct_month_may,pct_housing_loan,duration_median_not_used
+TP,416,0.84,43.61,886.0,1.79,54.81,35.1,1.68,7.69,18.99,301.5
+FP,538,0.79,43.84,941.5,2.04,45.35,16.73,2.6,11.71,21.0,163.0
+FN,377,0.35,39.66,550.0,2.54,16.98,0.0,19.1,29.44,58.89,656.0
+TN,5451,0.27,40.76,382.0,2.94,13.03,0.0,34.38,33.9,60.45,161.0
