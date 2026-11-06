@@ -108,16 +108,16 @@ def plot_duration_gap(path, name="F2b_duration_gap.png", split="validation"):
             ax.annotate(f"{v:.2f}", (x, v + s), textcoords="offset points", xytext=(0, 4),
                         ha="center", fontsize=8, color=ps.INK_2)
     if prevalence is not None:
-        ax.axhline(prevalence, color=ps.NO_COLOR, linestyle="--", linewidth=1)
-        ax.annotate(f"no skill = positive rate ({prevalence:.3f})", (len(names) - 0.5, prevalence),
-                    textcoords="offset points", xytext=(0, 4), ha="right", fontsize=8, color=ps.INK_2)
+        # Labelled in the legend so the text does not sit on top of the bars.
+        ax.axhline(prevalence, color=ps.NO_COLOR, linestyle="--", linewidth=1,
+                   label=f"No skill = positive rate ({prevalence:.3f})")
     ax.set_xticks(range(len(names)))
     ax.set_xticklabels([LABELS[m].replace(" (", "\n(").replace(", ", ",\n") for m in names], fontsize=9)
     ax.set_ylabel(f"{split} PR-AUC (mean ± std, 3 seeds)")
     ax.set_ylim(0, 1)
     ax.grid(axis="x", visible=False)
     ax.legend(loc="upper left")
-    ax.set_title("The duration leak: PR-AUC with and without the call length")
+    ax.set_title("The duration leak: PR-AUC with and without call length")
     FIG.mkdir(parents=True, exist_ok=True)
     fig.savefig(FIG / name)
     plt.close(fig)

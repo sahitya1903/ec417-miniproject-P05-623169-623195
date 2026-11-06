@@ -28,7 +28,7 @@ fixed on validation beforehand. Numbers are mean ± std over seeds 42, 43, 44.
 
 ## Business view (chosen model: HGB class-weighted, highest validation PR-AUC)
 
-- Calling the top 20% of clients finds 62% of subscribers (lift ≈ 3.1); the top 10% finds 43% (F5).
+- Calling the top 20% of clients finds 62% of subscribers (lift ≈ 3.1); the top 10% finds 42% (F5).
 - At the validation-chosen threshold (seed 42) the model calls 14% of clients; 44% of those calls
   subscribe (precision) and it finds 52% of all subscribers (F7).
 - Profit (call cost 5, reward 50): the threshold chosen on validation earns 17.6k on the test list,

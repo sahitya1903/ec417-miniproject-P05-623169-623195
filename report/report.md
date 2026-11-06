@@ -135,7 +135,7 @@ of many configurations on the same validation set. The ranking of the models did
 <figure class="pair"><div class="figrow"><img src="../results/figures/F3_pr_curves.png" style="flex: 1.300"><img src="../results/figures/F9_reliability.png" style="flex: 1.117"></div><figcaption>Figure 2 (left). Test precision–recall curves, DEPLOYABLE set (seed 42). (Right) Reliability diagram: class weighting inflates the predicted probabilities.</figcaption></figure>
 
 **Business view.** We use the weighted boosting model, which had the best validation PR-AUC. Calling the top 10%
-of the ranked list reaches 43% of all subscribers, and the top 20% reaches 62%, a lift of about 3.1 over random
+of the ranked list reaches 42% of all subscribers, and the top 20% reaches 62%, a lift of about 3.1 over random
 calling (Figure 3). At the F1-optimal threshold the model calls 14% of clients; 44% of those calls succeed and
 52% of all subscribers are reached (416 found, 377 missed, 538 wasted calls for seed 42). With c = 5 and r = 50,
 the threshold chosen on validation earns about 17.6k on the test list, against 5.7k for calling everyone. At
@@ -229,9 +229,10 @@ requirements: `python scripts/get_data.py && python -m src.train --final && pyth
 laptop CPU in about 17.5 minutes (Python 3.12.10, scikit-learn 1.9.0). The dataset and fitted models are not committed; the download
 script fetches the data from UCI and checks its shape.
 
-**AI-use statement.** We used Claude (Anthropic), through Claude Code, to help write the implementation plan,
-the code, the EDA notebook, the README and this report. Every number in the report was produced by the code in
-the repository and taken from `results/*.csv`. We reviewed the code, the split and leak-prevention logic, and the
+**AI-use statement.** We completed most of this project ourselves, including the implementation, experiments,
+analysis, notebooks, README, report and slides. We used Claude (Anthropic), through Claude Code, only for review
+purposes: to review our work and suggest improvements. Every number in the report was produced by the code in the
+repository and taken from `results/*.csv`. We reviewed the code, the split and leak-prevention logic, and the
 figures, and checked the headline numbers against `results/metrics.csv`. We are responsible for the content and
 can explain every step.
 

@@ -9,7 +9,8 @@ roll nos. 623169, 623195 · NIT Andhra Pradesh
 > the unweighted ablation scores 0.446 ± 0.003 and gives much better-calibrated probabilities.
 > Calling the top 20% of the ranked list finds **62% of all subscribers** (lift 3.1).
 
-The full write-up with the reasoning is in [report/report.pdf](report/report.pdf).
+The full write-up with the reasoning is in [report/report.pdf](report/report.pdf); the 10 slides are in
+[slides/CallWise_P05_slides.pdf](slides/CallWise_P05_slides.pdf) (PowerPoint source alongside).
 
 ---
 
@@ -45,7 +46,8 @@ call has ended, and a 0-second call is always a "no". Every model is run on two 
 
 `"unknown"` values are kept as their own category (they carry signal) and `pdays = -1` ("never contacted") is
 kept as-is, plus a `previously_contacted` flag. Full details, citation and checksum: [data/README.md](data/README.md).
-Exploratory analysis: [notebooks/01_eda.ipynb](notebooks/01_eda.ipynb).
+Exploratory analysis: [notebooks/01_eda.ipynb](notebooks/01_eda.ipynb). Experiments walkthrough:
+[notebooks/02_experiments.ipynb](notebooks/02_experiments.ipynb).
 
 ![Class balance](results/figures/F1_class_balance.png)
 
@@ -121,7 +123,7 @@ Raw numbers: [results/metrics.csv](results/metrics.csv) (test) and [results/val_
 
 **Business view** (weighted HGB, the model with the best validation PR-AUC):
 
-* Calling the top 10% of the ranked list finds 43% of subscribers; the top 20% finds 62% (lift ≈ 3.1).
+* Calling the top 10% of the ranked list finds 42% of subscribers; the top 20% finds 62% (lift ≈ 3.1).
 * At the validation-chosen threshold the model calls 14% of clients; 44% of those calls end in a
   subscription, and 52% of all subscribers are reached ([F7](results/figures/F7_confusion_matrix.png)).
 * With a call cost of 5 and a reward of 50 per subscription, the threshold chosen on validation earns
@@ -194,6 +196,9 @@ python scripts/get_data.py && python -m src.train --final && python -m src.evalu
   Without `--final` only validation scores are produced. Fitted models go to `checkpoints/` (git-ignored).
 * `src.evaluate` prints the summary tables and writes every figure in `results/figures/` and the error-analysis CSVs.
 * **Runtime:** about 17.5 minutes on the machine above (training 16.5 min, almost all of it hyperparameter search; evaluation 1 min). Re-running from a fresh clone reproduced every test metric in `results/metrics.csv` exactly (train times aside).
+* `notebooks/02_experiments.ipynb` runs top to bottom in under a minute: it re-fits the configuration `src.train`
+  chose for every model (seed 42), checks that the validation scores match `results/val_metrics.csv` exactly, and
+  reads (never re-scores) the test results.
 * `python scripts/build_report.py` rebuilds `report/report.pdf` from `report/report.md` (needs Chrome or Edge).
 
 ```
@@ -207,18 +212,20 @@ python scripts/get_data.py && python -m src.train --final && python -m src.evalu
 ├── src/evaluate.py         summaries and figures F1-F9
 ├── src/errors.py           error analysis and slices
 ├── notebooks/01_eda.ipynb  exploratory data analysis
+├── notebooks/02_experiments.ipynb  experiments walkthrough (runs in < 1 min)
 ├── results/                metrics, figures, ERROR_ANALYSIS.md
-└── report/                 report.md and report.pdf
+├── report/                 report.md and report.pdf
+└── slides/                 10 slides (.pptx and .pdf)
 ```
 
 ## 9. AI-use statement
 
-We used **Claude (Anthropic), through Claude Code**, throughout the project: to help write the implementation
-plan, the code in `scripts/` and `src/`, the EDA notebook, and to draft this README and the report.
-Every number in the README and report was produced by the code in this repository and copied from
-`results/*.csv`; none was typed in by hand from memory. We reviewed the code, the split and leak-prevention
-logic, and the figures, and checked the headline numbers against `results/metrics.csv`. We are responsible for
-all content and can explain every step.
+We completed most of this project ourselves, including the implementation, experiments, analysis, notebooks,
+README, report and slides. We used **Claude (Anthropic), through Claude Code, only for review purposes**:
+to review our work and suggest improvements. Every number in the README and report was produced by the code
+in this repository and copied from `results/*.csv`; none was typed in by hand from memory. We reviewed the
+code, the split and leak-prevention logic, and the figures, and checked the headline numbers against
+`results/metrics.csv`. We are responsible for all content and can explain every step.
 
 ## 10. References
 
